@@ -6,7 +6,7 @@ public class Player {
     private int dirX;
     private int dirY;
     private int score;
-    private Queue bag;
+    private CircularQueue bag;
 
     public Player(int posX, int posY, int score) {
         this.posX = posX;
@@ -14,15 +14,15 @@ public class Player {
         this.dirX = 0;
         this.dirY = 0;
         this.score = score;
-        this.bag = new Queue(10000000);
+        this.bag = new CircularQueue(1000);
     }
 
     public boolean isMoving() {
         return (dirX != 0 || dirY != 0);
     }
 
-    public void take(char chr) {
-        this.bag.enqueue(chr);
+    public void take(String sym) {
+        this.bag.enqueue(sym);
     }
 
     public void goRight() {
@@ -45,7 +45,17 @@ public class Player {
         this.dirY = 1;
     }
 
-    public void move() {
+    public void goBack() {
+        this.dirX *= -1;
+        this.dirY *= -1;
+    }
+
+    public void move(int screenWidth, int screenHeight) {
+        // border collision
+        if ((this.dirX == 1 && this.posX + 1 >= screenWidth) || (this.dirX == -1 && this.posX <= 0) ||
+                (this.dirY == 1 && this.posY + 1 >= screenHeight) || (this.dirY == -1 && this.posY <= 0)) this.stop();
+
+        // movement
         this.posX += this.dirX;
         this.posY += this.dirY;
     }
@@ -53,6 +63,10 @@ public class Player {
     public void stop() {
         this.dirX = 0;
         this.dirY = 0;
+    }
+
+    public void addScore(int score) {
+        this.score += score;
     }
 
 
@@ -97,11 +111,11 @@ public class Player {
         this.dirY = dirY;
     }
 
-    public Queue getBag() {
+    public CircularQueue getBag() {
         return bag;
     }
 
-    public void setBag(Queue bag) {
+    public void setBag(CircularQueue bag) {
         this.bag = bag;
     }
 }
