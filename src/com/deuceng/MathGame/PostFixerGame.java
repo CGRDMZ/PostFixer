@@ -3,7 +3,6 @@ package com.deuceng.MathGame;
 import enigma.console.Console;
 import enigma.core.Enigma;
 import enigma.event.TextMouseListener;
-import sun.awt.windows.ThemeReader;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -38,7 +37,7 @@ public class PostFixerGame {
     public TextMouseListener tmlis;
     public KeyListener klis;
 
-    private boolean flag;
+    private boolean isStart;
 
     public int keypr;   // key pressed?
     public int rkey;    // key   (for press/release)
@@ -47,14 +46,13 @@ public class PostFixerGame {
         cn = Enigma.getConsole("#Post Fixer Game#", SCREEN_WIDTH, SCREEN_HEIGHT, 32);
         start = 0;
         number = "";
-        flag = true;
+        isStart = true;
         this.player = new Player(0, 0, 0);
         this.evaluation = new Stack();
         this.input = new Queue(100000000);
         timeElapsed = 0;
         start = System.currentTimeMillis();
         this.run();
-
     }
 
     private void init() throws Exception {
@@ -79,9 +77,9 @@ public class PostFixerGame {
         if (mode == 1)
             take();
 
-        if (mode == 0 && player.getBag().size() != 0) {
-            evaluate();
-        }
+//        if (mode == 0 && player.getBag().size() != 0) {
+//            evaluate();
+//        }
 
         player.move(BOARD_WIDTH, BOARD_HEIGHT);
         if (mode != 1)
@@ -195,7 +193,8 @@ public class PostFixerGame {
         }
 
     }
-    private boolean isSymbol(String s) {
+
+    private boolean isOperator(String s) {
         return s.equals(".") || s.equals("+") || s.equals("-") || s.equals("*") || s.equals("/");
     }
 
@@ -210,9 +209,9 @@ public class PostFixerGame {
             String symbol = (String) player.getBag().peek();
             if (!player.getBag().peek().equals("+") && !player.getBag().peek().equals("-") && !player.getBag().peek().equals("*") && !player.getBag().peek().equals("/") && symbol.length() != 1) {
                 score += symbol.length() * 2;
-            }else if (isSymbol(symbol) && (isNumber(previousSymbol)|| previousSymbol.equals("")) || (isSymbol(previousSymbol) ||previousSymbol.equals("")) && isNumber(symbol)) {
+            } else if (isOperator(symbol) && isNumber(previousSymbol) || isOperator(previousSymbol) && isNumber(symbol)) {
                 score += 2;
-            }else{
+            } else {
                 score += 1;
             }
             previousSymbol = symbol;
@@ -247,7 +246,7 @@ public class PostFixerGame {
                 evaluation.push(dequeue);
             }
         } catch (EmptyStackException e) {
-            player.addScore(-20);
+            // only the first time when the mode changes add player - 20
         }
     }
 
@@ -299,15 +298,26 @@ public class PostFixerGame {
                 if (rkey == KeyEvent.VK_T) {
                     start = System.currentTimeMillis() - pauseTime;
                     mode = 1;
+
+
+                    while (!evaluation.isEmpty()) {
+                        evaluation.pop();
+                    }
                 }
                 if (rkey == KeyEvent.VK_F) {
                     player.addScore(calculateScore());
                     mode = 0;
                     start += System.currentTimeMillis() - pauseTime;
+
+                    if (!isStart && player.getBag().size() != 1) {
+                        player.addScore(-20);
+                    }
+                    isStart = false;
+
                 }
-//                if (rkey == KeyEvent.VK_SPACE) {
-//                    evaluate();
-//                }
+                if (rkey == KeyEvent.VK_SPACE && mode == 0 && player.getBag().size() != 0) {
+                    evaluate();
+                }
             }
 
             keypr = 0;
