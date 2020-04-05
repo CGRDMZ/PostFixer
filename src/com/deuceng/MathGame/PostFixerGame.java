@@ -209,7 +209,7 @@ public class PostFixerGame {
             String symbol = (String) player.getBag().peek();
             if (!player.getBag().peek().equals("+") && !player.getBag().peek().equals("-") && !player.getBag().peek().equals("*") && !player.getBag().peek().equals("/") && symbol.length() != 1) {
                 score += symbol.length() * 2;
-            } else if (isOperator(symbol) && isNumber(previousSymbol) || isOperator(previousSymbol) && isNumber(symbol)) {
+            } else if (!previousSymbol.equals("") && (isOperator(symbol) && isNumber(previousSymbol) || isOperator(previousSymbol) && isNumber(symbol))) {
                 score += 2;
             } else {
                 score += 1;
@@ -247,6 +247,7 @@ public class PostFixerGame {
             }
         } catch (EmptyStackException e) {
             // only the first time when the mode changes add player - 20
+            player.addScore(-20);
         }
     }
 
@@ -308,10 +309,6 @@ public class PostFixerGame {
                     player.addScore(calculateScore());
                     mode = 0;
                     start += System.currentTimeMillis() - pauseTime;
-
-                    if (!isStart && player.getBag().size() != 1) {
-                        player.addScore(-20);
-                    }
                     isStart = false;
 
                 }
