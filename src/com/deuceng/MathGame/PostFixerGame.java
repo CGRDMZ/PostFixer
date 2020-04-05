@@ -37,7 +37,7 @@ public class PostFixerGame {
     public TextMouseListener tmlis;
     public KeyListener klis;
 
-    private boolean isStart;
+    private boolean isPunishable;
 
     public int keypr;   // key pressed?
     public int rkey;    // key   (for press/release)
@@ -46,7 +46,6 @@ public class PostFixerGame {
         cn = Enigma.getConsole("#Post Fixer Game#", SCREEN_WIDTH, SCREEN_HEIGHT, 32);
         start = 0;
         number = "";
-        isStart = true;
         this.player = new Player(0, 0, 0);
         this.evaluation = new Stack();
         this.input = new Queue(100000000);
@@ -64,6 +63,7 @@ public class PostFixerGame {
             }
         }
 
+        isPunishable = true;
         timeElapsed = System.currentTimeMillis() - start;
     }
 
@@ -247,7 +247,10 @@ public class PostFixerGame {
             }
         } catch (EmptyStackException e) {
             // only the first time when the mode changes add player - 20
-            player.addScore(-20);
+            if (isPunishable) {
+                player.addScore(-20);
+                isPunishable = !isPunishable;
+            }
         }
     }
 
@@ -299,6 +302,7 @@ public class PostFixerGame {
                 if (rkey == KeyEvent.VK_T) {
                     start = System.currentTimeMillis() - pauseTime;
                     mode = 1;
+                    isPunishable = true;
 
 
                     while (!evaluation.isEmpty()) {
@@ -309,7 +313,6 @@ public class PostFixerGame {
                     player.addScore(calculateScore());
                     mode = 0;
                     start += System.currentTimeMillis() - pauseTime;
-                    isStart = false;
 
                 }
                 if (rkey == KeyEvent.VK_SPACE && mode == 0 && player.getBag().size() != 0) {
