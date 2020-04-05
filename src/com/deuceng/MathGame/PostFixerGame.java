@@ -172,7 +172,6 @@ public class PostFixerGame {
         cn.getWriter().print(s);
 
 
-
         // displays score
         cn.getTextWindow().setCursorPosition(26, 5);
         cn.getTextWindow().output("Score:");
@@ -232,20 +231,21 @@ public class PostFixerGame {
         switch (mode) {
             case 0:
                 cn.getTextWindow().setCursorPosition(26, 6);
-                cn.getTextWindow().output("Mode : Free        ");
+                cn.getTextWindow().output("Mode :Free        ");
                 break;
             case 1:
                 cn.getTextWindow().setCursorPosition(26, 6);
-                cn.getTextWindow().output("Mode : Take        ");
+                cn.getTextWindow().output("Mode :Take        ");
                 break;
             case 2:
                 cn.getTextWindow().setCursorPosition(26, 6);
-                cn.getTextWindow().output("Mode : Evaluation  ");
+                cn.getTextWindow().output("Mode :Evaluation  ");
         }
 
         cn.getTextWindow().setCursorPosition(BOARD_X_OFFSET + player.getPosX(), BOARD_Y_OFFSET + player.getPosY());
         cn.getWriter().print('X');
     }
+
 
     private void take() {
         String symbol = gameScreen[player.getPosY()][player.getPosX()];
@@ -284,14 +284,16 @@ public class PostFixerGame {
         return !(s.equals(".") || s.equals("+") || s.equals("-") || s.equals("*") || s.equals("/"));
     }
 
-    public int calculateScore() {
+    private int calculateScore() {
         int score = 0;
         String previousSymbol = "";
         for (int i = 0; i < player.getBag().size(); i++) {
             String symbol = (String) player.getBag().peek();
-            if (!player.getBag().peek().equals("+") && !player.getBag().peek().equals("-") && !player.getBag().peek().equals("*") && !player.getBag().peek().equals("/") && symbol.length() != 1) {
+            if (!player.getBag().peek().equals("+") && !player.getBag().peek().equals("-")
+                    && !player.getBag().peek().equals("*") && !player.getBag().peek().equals("/") && symbol.length() != 1) {
                 score += symbol.length() * 2;
-            } else if (!previousSymbol.equals("") && (isOperator(symbol) && isNumber(previousSymbol) || isOperator(previousSymbol) && isNumber(symbol))) {
+            } else if (!previousSymbol.equals("") && (isOperator(symbol) && isNumber(previousSymbol)
+                    || isOperator(previousSymbol) && isNumber(symbol))) {
                 score += 2;
             } else {
                 score += 1;
@@ -408,7 +410,6 @@ public class PostFixerGame {
 
 
     public void run() throws Exception {
-
         klis = new KeyListener() {
             public void keyTyped(KeyEvent e) {
             }
@@ -425,13 +426,12 @@ public class PostFixerGame {
 //        cn.getTextWindow().setCursorType(0);
         init();
         while (true) {
+            // TODO: when the time is out, ask the player whether start again or quit.
             update();
             draw();
             if (mode == 2)
                 mode = 0;
             Thread.sleep(200);
-
-
         }
     }
 }

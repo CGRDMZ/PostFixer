@@ -45,10 +45,10 @@ public class Player {
         this.dirY = 1;
     }
 
-    public void goBack() {
-        this.dirX *= -1;
-        this.dirY *= -1;
-    }
+//    public void goBack() {
+//        this.dirX *= -1;
+//        this.dirY *= -1;
+//    }
 
     public void move(int screenWidth, int screenHeight) {
         // border collision
