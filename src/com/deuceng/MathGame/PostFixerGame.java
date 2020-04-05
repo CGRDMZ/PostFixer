@@ -1,11 +1,14 @@
 package com.deuceng.MathGame;
 
 import enigma.console.Console;
+import enigma.console.TextAttributes;
 import enigma.core.Enigma;
 import enigma.event.TextMouseListener;
 
+import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.font.TextAttribute;
 import java.util.*;
 
 public class PostFixerGame {
@@ -14,6 +17,9 @@ public class PostFixerGame {
 
     private static final int BOARD_HEIGHT = 10;
     private static final int BOARD_WIDTH = 10;
+
+    private static final int BOARD_X_OFFSET = 2;
+    private static final int BOARD_Y_OFFSET = 2;
 
     private String[][] gameScreen;
     private long timeLeft;
@@ -51,7 +57,6 @@ public class PostFixerGame {
         this.input = new Queue(100000000);
         timeElapsed = 0;
         start = System.currentTimeMillis();
-        this.run();
     }
 
     private void init() throws Exception {
@@ -92,34 +97,87 @@ public class PostFixerGame {
     }
 
     private void draw() {
+
+        //display the border
+        for (int i = 0; i < gameScreen[0].length + 2; i++) {
+            // # characters top and bottom
+            cn.getTextWindow().setCursorPosition(BOARD_X_OFFSET - 1 + i, BOARD_Y_OFFSET - 1);
+            cn.getWriter().print("#");
+
+            cn.getTextWindow().setCursorPosition(BOARD_X_OFFSET - 1 + i, BOARD_Y_OFFSET + gameScreen.length);
+            cn.getWriter().print("#");
+        }
+
+        for (int i = 0; i < gameScreen.length; i++) {
+            // left and right borders
+            cn.getTextWindow().setCursorPosition(BOARD_X_OFFSET - 1, BOARD_Y_OFFSET + i);
+            cn.getWriter().print("#");
+
+            cn.getTextWindow().setCursorPosition(BOARD_X_OFFSET + gameScreen[0].length, BOARD_Y_OFFSET + i);
+            cn.getWriter().print("#");
+        }
+
+        // drawing numbers around the board
+        for (int i = 0; i < gameScreen[0].length; i++) {
+            cn.getTextWindow().setCursorPosition(BOARD_X_OFFSET + i, BOARD_Y_OFFSET - 2);
+            cn.getWriter().print((i + 1) % 10);
+        }
+
+        for (int i = 0; i < gameScreen.length; i++) {
+            cn.getTextWindow().setCursorPosition(BOARD_X_OFFSET - 2, BOARD_Y_OFFSET + i);
+            cn.getWriter().print((i + 1) % 10);
+        }
+
         // displays the game board
         for (int i = 0; i < gameScreen.length; i++) {
             for (int j = 0; j < gameScreen[i].length; j++) {
-                cn.getTextWindow().setCursorPosition(0 + j, i);
+                cn.getTextWindow().setCursorPosition(BOARD_X_OFFSET + j, BOARD_Y_OFFSET + i);
                 cn.getWriter().print(gameScreen[i][j]);
             }
-
         }
+
+        // code for setting different colors
+        cn.setTextAttributes(new TextAttributes(new Color(255, 255, 255), new Color(28, 174, 200)));
+        for (int i = 0; i < 8; i++) {
+            cn.getTextWindow().setCursorPosition(BOARD_X_OFFSET + gameScreen[0].length + 14 + i, 9);
+            cn.getWriter().print("<");
+
+            cn.getTextWindow().setCursorPosition(BOARD_X_OFFSET + gameScreen[0].length + 14 + i, 11);
+            cn.getWriter().print("<");
+        }
+        // code for setting different colors
+        cn.setTextAttributes(new TextAttributes(new Color(255, 255, 255)));
+
         // displays the input queue
         for (int i = 0; i < input.size(); i++) {
-            cn.getTextWindow().setCursorPosition(30 + i, 0);
+            cn.getTextWindow().setCursorPosition(BOARD_X_OFFSET + gameScreen[0].length + 14 + i, 10);
             cn.getWriter().print(input.peek());
             input.enqueue(input.dequeue());
         }
+
+
         // displays the player's bag
         String s = "";
 
-        cn.getTextWindow().setCursorPosition(30, 1);
+        cn.getTextWindow().setCursorPosition(BOARD_X_OFFSET + gameScreen[0].length + 3, 2);
+        cn.getWriter().print("Expression:");
+
+        cn.getTextWindow().setCursorPosition(BOARD_X_OFFSET + gameScreen[0].length + 15, 2);
         cn.getWriter().print("                                     ");
         for (int i = 0; i < player.getBag().size(); i++) {
             s += player.getBag().peek() + " ";
             player.getBag().enqueue(player.getBag().dequeue());
         }
-        cn.getTextWindow().setCursorPosition(30, 1);
+        cn.getTextWindow().setCursorPosition(BOARD_X_OFFSET + gameScreen[0].length + 15, 2);
         cn.getWriter().print(s);
 
+
+
         // displays score
-        cn.getTextWindow().setCursorPosition(30, 8);
+        cn.getTextWindow().setCursorPosition(26, 5);
+        cn.getTextWindow().output("Score:");
+
+        cn.getTextWindow().setCursorPosition(32, 5);
         cn.getTextWindow().output("" + player.getScore());
 
         // displays the evaluation stack
@@ -127,6 +185,27 @@ public class PostFixerGame {
         cn.getWriter().print("                                    ");
         s = "";
         Stack temp = new Stack();
+
+        for (int i = 0; i < 7; i++) {
+            cn.getTextWindow().setCursorPosition(55, i + 3);
+            cn.getWriter().print("|");
+        }
+
+        for (int i = 0; i < 7; i++) {
+            cn.getTextWindow().setCursorPosition(66, i + 3);
+            cn.getWriter().print("|");
+        }
+
+        for (int i = 0; i < 10; i++) {
+            cn.getTextWindow().setCursorPosition(56 + i, 10);
+            cn.getWriter().print("-");
+        }
+
+        cn.getTextWindow().setCursorPosition(55, 10);
+        cn.getWriter().print("+");
+
+        cn.getTextWindow().setCursorPosition(66, 10);
+        cn.getWriter().print("+");
 
         for (int i = -evaluation.size(); i < 10; i++) {
             cn.getTextWindow().setCursorPosition(60, i);
@@ -143,25 +222,28 @@ public class PostFixerGame {
         }
 
         // displays time
-        cn.getTextWindow().setCursorPosition(30, 5);
+        cn.getTextWindow().setCursorPosition(26, 4);
+        cn.getTextWindow().output("Time :");
+
+        cn.getTextWindow().setCursorPosition(32, 4);
         cn.getTextWindow().output(timeLeft + "         ");
 
         // displays the game mode
         switch (mode) {
             case 0:
-                cn.getTextWindow().setCursorPosition(30, 6);
-                cn.getTextWindow().output("Free Mode        ");
+                cn.getTextWindow().setCursorPosition(26, 6);
+                cn.getTextWindow().output("Mode : Free        ");
                 break;
             case 1:
-                cn.getTextWindow().setCursorPosition(30, 6);
-                cn.getTextWindow().output("Take Mode        ");
+                cn.getTextWindow().setCursorPosition(26, 6);
+                cn.getTextWindow().output("Mode : Take        ");
                 break;
             case 2:
-                cn.getTextWindow().setCursorPosition(30, 6);
-                cn.getTextWindow().output("Evaluation Mode  ");
+                cn.getTextWindow().setCursorPosition(26, 6);
+                cn.getTextWindow().output("Mode : Evaluation  ");
         }
 
-        cn.getTextWindow().setCursorPosition(player.getPosX(), player.getPosY());
+        cn.getTextWindow().setCursorPosition(BOARD_X_OFFSET + player.getPosX(), BOARD_Y_OFFSET + player.getPosY());
         cn.getWriter().print('X');
     }
 
@@ -340,7 +422,7 @@ public class PostFixerGame {
             }
         };
         cn.getTextWindow().addKeyListener(klis);
-//        cn.getTextWindow().setCursorType(1);
+//        cn.getTextWindow().setCursorType(0);
         init();
         while (true) {
             update();
