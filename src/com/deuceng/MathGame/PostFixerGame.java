@@ -388,6 +388,11 @@ public class PostFixerGame {
                     mode = 1;
                     isPunishable = true;
 
+                    // reset player's bag, in case not all the evaluation done.
+                    while (!player.getBag().isEmpty()) {
+                        player.getBag().dequeue();
+                    }
+
 
                     while (!evaluation.isEmpty()) {
                         evaluation.pop();
@@ -397,6 +402,8 @@ public class PostFixerGame {
                     player.addScore(calculateScore());
                     mode = 0;
                     start += System.currentTimeMillis() - pauseTime;
+
+
 
                 }
                 if (rkey == KeyEvent.VK_SPACE && mode == 0 && player.getBag().size() != 0) {
