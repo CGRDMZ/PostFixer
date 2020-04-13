@@ -8,7 +8,6 @@ import enigma.event.TextMouseListener;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.awt.font.TextAttribute;
 import java.util.*;
 
 public class PostFixerGame {
@@ -20,6 +19,9 @@ public class PostFixerGame {
 
     private static final int BOARD_X_OFFSET = 2;
     private static final int BOARD_Y_OFFSET = 2;
+
+    private static final Color TURQUOISE = new Color(28, 174, 200);
+    private static final Color WHITE = new Color(255, 255, 255);
 
     private String[][] gameScreen;
     private long timeLeft;
@@ -53,7 +55,7 @@ public class PostFixerGame {
         start = 0;
         number = "";
         this.player = new Player(0, 0, 0);
-        this.evaluation = new Stack();
+        this.evaluation = new Stack(100);
         this.input = new Queue(100000000);
         timeElapsed = 0;
         start = System.currentTimeMillis();
@@ -137,7 +139,7 @@ public class PostFixerGame {
         }
 
         // code for setting different colors
-        cn.setTextAttributes(new TextAttributes(new Color(255, 255, 255), new Color(28, 174, 200)));
+        cn.setTextAttributes(new TextAttributes(WHITE, TURQUOISE));
         for (int i = 0; i < 8; i++) {
             cn.getTextWindow().setCursorPosition(BOARD_X_OFFSET + gameScreen[0].length + 14 + i, 9);
             cn.getWriter().print("<");
@@ -145,7 +147,7 @@ public class PostFixerGame {
             cn.getTextWindow().setCursorPosition(BOARD_X_OFFSET + gameScreen[0].length + 14 + i, 11);
             cn.getWriter().print("<");
         }
-        // code for setting different colors
+        // resetting to default
         cn.setTextAttributes(new TextAttributes(new Color(255, 255, 255)));
 
         // displays the input queue
@@ -183,7 +185,7 @@ public class PostFixerGame {
         cn.getTextWindow().setCursorPosition(30, 7);
         cn.getWriter().print("                                    ");
         s = "";
-        Stack temp = new Stack();
+        Stack temp = new Stack(100);
 
         for (int i = 0; i < 7; i++) {
             cn.getTextWindow().setCursorPosition(55, i + 3);
@@ -242,8 +244,10 @@ public class PostFixerGame {
                 cn.getTextWindow().output("Mode :Evaluation  ");
         }
 
+        cn.setTextAttributes(new TextAttributes(new Color(80, 243, 255)));
         cn.getTextWindow().setCursorPosition(BOARD_X_OFFSET + player.getPosX(), BOARD_Y_OFFSET + player.getPosY());
         cn.getWriter().print('X');
+        cn.setTextAttributes(new TextAttributes(WHITE));
     }
 
 
@@ -251,7 +255,7 @@ public class PostFixerGame {
         String symbol = gameScreen[player.getPosY()][player.getPosX()];
 
         if (!symbol.equals(".")) {
-            if (symbol.equals("+") || symbol.equals("-") || symbol.equals("*") || symbol.equals("/")) {
+            if (isOperator(symbol)) {
                 player.take(symbol);
                 gameScreen[player.getPosY()][player.getPosX()] = ".";
                 player.stop();
@@ -260,10 +264,10 @@ public class PostFixerGame {
                 gameScreen[player.getPosY()][player.getPosX()] = ".";
                 try {
                     String nextSymbol = gameScreen[player.getPosY() + player.getDirY()][player.getPosX() + player.getDirX()];
-                    if (nextSymbol.equals(".") || nextSymbol.equals("+") || nextSymbol.equals("-") || nextSymbol.equals("*") || nextSymbol.equals("/")) {
+                    if (nextSymbol.equals(".") || isOperator(nextSymbol)) {
                         player.stop();
                     }
-                } catch (ArrayIndexOutOfBoundsException e) {
+                }catch (ArrayIndexOutOfBoundsException ignored){
 
                 }
             }
@@ -289,11 +293,11 @@ public class PostFixerGame {
         String previousSymbol = "";
         for (int i = 0; i < player.getBag().size(); i++) {
             String symbol = (String) player.getBag().peek();
-            if (!player.getBag().peek().equals("+") && !player.getBag().peek().equals("-")
-                    && !player.getBag().peek().equals("*") && !player.getBag().peek().equals("/") && symbol.length() != 1) {
+
+            if (!isOperator((String)player.getBag().peek()) && symbol.length() != 1) {
                 score += symbol.length() * 2;
             } else if (!previousSymbol.equals("") && (isOperator(symbol) && isNumber(previousSymbol)
-                    || isOperator(previousSymbol) && isNumber(symbol))) {
+                    || (isOperator(previousSymbol) && isNumber(symbol)))) {
                 score += 2;
             } else {
                 score += 1;
@@ -306,7 +310,7 @@ public class PostFixerGame {
 
     public void evaluate() {
         mode = 2;
-        int size = player.getBag().size();
+//        int size = player.getBag().size();
 
         String dequeue = (String) player.getBag().dequeue();
         try {
