@@ -11,7 +11,7 @@ import java.awt.event.KeyListener;
 import java.util.*;
 
 public class PostFixerGame {
-    private static final int SCREEN_WIDTH = 80;
+    private static final int SCREEN_WIDTH = 70;
     private static final int SCREEN_HEIGHT = 15;
 
     private static final int BOARD_HEIGHT = 10;
@@ -61,7 +61,7 @@ public class PostFixerGame {
         start = System.currentTimeMillis();
     }
 
-    private void init() throws Exception {
+    private void init() {
         mode = 0;
         gameScreen = new String[10][10];
         for (int i = 0; i < gameScreen.length; i++) {
@@ -71,7 +71,21 @@ public class PostFixerGame {
         }
 
         isPunishable = true;
+        timeElapsed = 0;
+        start = System.currentTimeMillis();
         timeElapsed = System.currentTimeMillis() - start;
+
+        player.setScore(0);
+
+        // reset player's bag, in case not all the evaluation done.
+        while (!player.getBag().isEmpty()) {
+            player.getBag().dequeue();
+        }
+
+
+        while (!evaluation.isEmpty()) {
+            evaluation.pop();
+        }
     }
 
     private void update() throws Exception {
@@ -96,6 +110,10 @@ public class PostFixerGame {
             timeElapsed = (System.currentTimeMillis() - start);
         }
         timeLeft = (long) 60 - timeElapsed / 1000;
+
+        if (timeLeft == 0) {
+            init();
+        }
     }
 
     private void draw() {
