@@ -116,7 +116,7 @@ public class PostFixerGame {
         }
     }
 
-    private void draw() {
+    private void draw() throws InterruptedException {
 
         //display the border
         for (int i = 0; i < gameScreen[0].length + 2; i++) {
@@ -266,6 +266,11 @@ public class PostFixerGame {
         cn.getTextWindow().setCursorPosition(BOARD_X_OFFSET + player.getPosX(), BOARD_Y_OFFSET + player.getPosY());
         cn.getWriter().print('X');
         cn.setTextAttributes(new TextAttributes(WHITE));
+
+
+        if (mode == 2)
+            mode = 0;
+        Thread.sleep(200);
     }
 
 
@@ -330,26 +335,26 @@ public class PostFixerGame {
         mode = 2;
 //        int size = player.getBag().size();
 
-        String dequeue = (String) player.getBag().dequeue();
+        String symbol = (String) player.getBag().dequeue();
         try {
-            if ("+".equals(dequeue)) {
+            if ("+".equals(symbol)) {
                 int number1 = Integer.parseInt((String) evaluation.pop());
                 int number2 = Integer.parseInt((String) evaluation.pop());
-                evaluation.push("" + (number1 + number2));
-            } else if ("-".equals(dequeue)) {
+                evaluation.push("" + (number2 + number1));
+            } else if ("-".equals(symbol)) {
                 int number1 = Integer.parseInt((String) evaluation.pop());
                 int number2 = Integer.parseInt((String) evaluation.pop());
-                evaluation.push("" + (number1 - number2));
-            } else if ("/".equals(dequeue)) {
+                evaluation.push("" + (number2 - number1));
+            } else if ("/".equals(symbol)) {
                 int number1 = Integer.parseInt((String) evaluation.pop());
                 int number2 = Integer.parseInt((String) evaluation.pop());
-                evaluation.push("" + (number1 / number2));
-            } else if ("*".equals(dequeue)) {
+                evaluation.push("" + (number2 / number1));
+            } else if ("*".equals(symbol)) {
                 int number1 = Integer.parseInt((String) evaluation.pop());
                 int number2 = Integer.parseInt((String) evaluation.pop());
-                evaluation.push("" + (number1 * number2));
+                evaluation.push("" + (number2 * number1));
             } else {
-                evaluation.push(dequeue);
+                evaluation.push(symbol);
             }
         } catch (EmptyStackException e) {
             // only the first time when the mode changes add player - 20
@@ -400,10 +405,10 @@ public class PostFixerGame {
         if (keypr == 1) {
             long pauseTime = timeElapsed;
             if (!player.isMoving()) {
-                if (rkey == KeyEvent.VK_RIGHT) player.goRight();
-                if (rkey == KeyEvent.VK_LEFT) player.goLeft();
-                if (rkey == KeyEvent.VK_UP) player.goUp();
-                if (rkey == KeyEvent.VK_DOWN) player.goDown();
+                if (rkey == KeyEvent.VK_RIGHT || rkey == KeyEvent.VK_D) player.goRight();
+                if (rkey == KeyEvent.VK_LEFT || rkey == KeyEvent.VK_A) player.goLeft();
+                if (rkey == KeyEvent.VK_UP || rkey == KeyEvent.VK_W) player.goUp();
+                if (rkey == KeyEvent.VK_DOWN || rkey == KeyEvent.VK_S) player.goDown();
                 if (rkey == KeyEvent.VK_SPACE) gameScreen[player.getPosY()][player.getPosX()] = ".";
                 if (rkey == KeyEvent.VK_T) {
                     start = System.currentTimeMillis() - pauseTime;
@@ -453,14 +458,12 @@ public class PostFixerGame {
         };
         cn.getTextWindow().addKeyListener(klis);
 //        cn.getTextWindow().setCursorType(0);
+
+
         init();
         while (true) {
-            // TODO: when the time is out, ask the player whether start again or quit.
             update();
             draw();
-            if (mode == 2)
-                mode = 0;
-            Thread.sleep(200);
         }
     }
 }
